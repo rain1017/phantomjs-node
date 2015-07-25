@@ -1,6 +1,7 @@
 'use strict';
 
 var P = require('bluebird');
+var logger = require('log4js').getLogger('github');
 var phantomjs = require('../lib');
 
 if(process.argv.length < 4){
@@ -13,22 +14,16 @@ var main = P.coroutine(function*(){
     var phantom = yield phantomjs.create();
     var page = yield phantom.createPage();
 
-    page.on('LoadFinished', P.coroutine(function*(){
-        console.log('page.onLoadFinished %j', arguments);
-
-        var url = yield page.get('url');
-        console.log(url);
-        yield page.render('github.png');
-    }));
-
-    page.on('UrlChanged', function() {
-        console.log('page.onUrlChanged %j', arguments);
-    });
     page.on('ConsoleMessage', function() {
-        console.log('page.onConsoleMessage %j', arguments);
+        logger.info('onConsoleMessage %j', [].slice.call(arguments));
     });
+
+    // page.on('LoadFinished', function() {
+    //     console.log('onLoadFinished %j', [].slice.call(arguments));
+    // });
+
     // page.on('ResourceReceived', function() {
-    //     console.log("page.onResourceReceived %j", arguments);
+    //     console.log("onResourceReceived %j", [].slice.call(arguments));
     // });
 
     // page.onResourceRequested(
@@ -36,13 +31,15 @@ var main = P.coroutine(function*(){
     //         request.abort(); // in phantomjs context
     //     },
     //     function(requestData) {
-    //         console.log(requestData.url)  // in nodejs context
+    //         logger.info(requestData.url)  // in nodejs context
     //     },
     //     'arg1', 'arg2'
     // );
 
+    logger.info('open login page...');
     yield page.open('https://github.com/login');
 
+    logger.info('input user/password and submit...');
     yield page.evaluate(function(user, password){
         // in phantomjs context
         console.log(user);
@@ -50,9 +47,17 @@ var main = P.coroutine(function*(){
         document.querySelector('input[name=password]').value = password;
         document.querySelector('input[name=commit]').click();
     }, user, password);
+
+    logger.info('wait for home page load...');
+    yield page.waitFor('LoadFinished');
+
+    var url = yield page.get('url');
+    logger.info('done. loaded url: %s', url);
+
+    yield page.render('github.png');
 });
 
 if (require.main === module) {
-    main();
+    main().finally(process.exit);
 }
 

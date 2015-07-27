@@ -1,16 +1,16 @@
 {
-    "name": "phantomjs-plus",
+    "name": "phantomjs-node",
     "description": "",
     "version": "0.0.0",
     "author": "rain",
     "private" : false,
-    "homepage" : "https://github.com/rain1017/phantomjs-plus",
+    "homepage" : "https://github.com/rain1017/phantomjs-node",
     "repository" : {
         "type" : "git",
-        "url" : "https://github.com/rain1017/phantomjs-plus.git"
+        "url" : "https://github.com/rain1017/phantomjs-node.git"
     },
     "bugs" : {
-        "url" : "https://github.com/rain1017/phantomjs-plus/issues"
+        "url" : "https://github.com/rain1017/phantomjs-node/issues"
     },
     "keywords" : [
     ],
